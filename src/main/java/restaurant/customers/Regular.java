@@ -13,7 +13,7 @@ public class Regular extends Customer {
     }
 
     @Override
-    public MenuItem order(MenuItem[] menuItems) {
+    public MenuItem order() {
         int choice = this.random.nextInt(menuItems.length);
         return new MenuItem(menuItems[choice]);
     }

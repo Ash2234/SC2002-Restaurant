@@ -6,20 +6,25 @@ public abstract class Customer {
     private int satisfaction = 100;
     private int satisfactionLoss;
     private float bill;
-    private String status;
+    private CustomerStatus status;
+    private MenuItem[] menu;
 
-    public abstract MenuItem order(MenuItem[] menuItems);
+    public Customer(MenuItem[] menu) {
+        this.menu = menu;
+    }
 
-    public String getStatus() {
+    public abstract MenuItem order();
+
+    public CustomerStatus getStatus() {
         return this.status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CustomerStatus status) {
         this.status = status;
     }
 
     public boolean satisfactionDecay() {
-        if (this.status == "waiting" || this.status == "seated") {
+        if (this.status == CustomerStatus.WAITING || this.status == CustomerStatus.SEATED) {
             this.satisfaction -= this.satisfactionLoss;
         }
 
