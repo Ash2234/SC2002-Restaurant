@@ -1,4 +1,4 @@
-package restaurant;
+package restaurant.menu;
 
 public class MenuItem {
     private String name;
@@ -20,28 +20,18 @@ public class MenuItem {
         this.preparationUnits = menuItem.getPreparationUnits();
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
-    public float getPrice() {
-        return price;
-    }
+    public float getPrice() { return price; }
 
-    public int getPreparationUnits() {
-        return preparationUnits;
-    }
+    public int getPreparationUnits() { return preparationUnits; }
 
-    public MenuItemStatus getStatus() {
-        return status;
-    }
+    public MenuItemStatus getStatus() { return status; }
+
+    public Integer getTableNo() { return tableNo; }
 
     public void setStatus(MenuItemStatus status) {
         this.status = status;
-    }
-
-    public Integer getTableNo() {
-        return tableNo;
     }
 
     public void setTableNo(Integer tableNo) {

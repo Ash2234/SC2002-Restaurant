@@ -2,7 +2,7 @@ package restaurant.customers;
 
 import java.util.Random;
 
-import restaurant.MenuItem;
+import restaurant.menu.MenuItem;
 
 public class Regular extends Customer {
     static Random random = new Random(67L);

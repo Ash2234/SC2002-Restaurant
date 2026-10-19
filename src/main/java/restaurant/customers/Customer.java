@@ -1,6 +1,6 @@
 package restaurant.customers;
 
-import restaurant.MenuItem;
+import restaurant.menu.MenuItem;
 
 public abstract class Customer {
     private static int nextId = 1;
@@ -16,19 +16,13 @@ public abstract class Customer {
         this.id = nextId++;
     }
 
-    public String getName() {
-        return "Customer " + this.id;
-    }
-
     public abstract MenuItem order();
 
-    public int getSatisfaction() {
-        return this.satisfaction;
-    }
+    public String getName() { return "Customer " + this.id; }
 
-    public CustomerStatus getStatus() {
-        return this.status;
-    }
+    public int getSatisfaction() { return this.satisfaction; }
+
+    public CustomerStatus getStatus() { return this.status; }
 
     public void setStatus(CustomerStatus status) {
         this.status = status;

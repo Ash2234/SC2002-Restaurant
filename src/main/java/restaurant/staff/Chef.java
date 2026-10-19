@@ -2,8 +2,8 @@ package restaurant.staff;
 
 import java.util.ArrayList;
 
-import restaurant.MenuItem;
-import restaurant.MenuItemStatus;
+import restaurant.menu.MenuItem;
+import restaurant.menu.MenuItemStatus;
 import restaurant.ui.GameUI;
 
 public class Chef {
@@ -39,7 +39,7 @@ public class Chef {
             return false;
         }
 
-        this.ui.displayOrdersToPrepare(orders);
+        this.ui.displayOrdersToPrepare();
 
         int orderIndex = this.ui.chooseOrderToPrepare(orders.size());
         this.orders.get(orderIndex).cook();

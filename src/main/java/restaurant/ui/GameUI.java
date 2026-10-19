@@ -1,192 +1,219 @@
 package restaurant.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import restaurant.MenuItem;
+import restaurant.GameStats;
 import restaurant.customers.Customer;
+import restaurant.menu.MenuItem;
 
 public class GameUI {
-    private Scanner scanner;
+    // Print flags, combine with | (e.g. INDENT | PROMPT)
+    private static final int INDENT = 1;  // two-space indent
+    private static final int PROMPT = 2;  // no newline, trailing space
 
-    public GameUI(Scanner scanner) {
+    private Scanner scanner;
+    private Customer[] tables;
+    private GameStats stats;
+    private ArrayList<Customer> queue;
+    private ArrayList<MenuItem> orders;
+
+    public GameUI(Scanner scanner, Customer[] tables, ArrayList<Customer> queue, ArrayList<MenuItem> orders, GameStats stats) {
         this.scanner = scanner;
+        this.tables = tables;
+        this.stats = stats;
+        this.queue = queue;
+        this.orders = orders;
     }
 
     public int readInt() {
         while (!this.scanner.hasNextInt()) {
-            System.out.println("Please enter a number.");
+            print("input.notNumber");
             this.scanner.next();
         }
         return this.scanner.nextInt();
     }
 
-    public int readIntInRange(int min, int max, String invalidMessage) {
+    public int readIntInRange(int min, int max, String invalidKey) {
         while (true) {
             int choice = readInt();
             if (choice >= min && choice <= max) {
                 return choice;
             }
-            System.out.println(invalidMessage);
+            print(invalidKey);
         }
     }
 
     public int chooseWaiterAction() {
-        System.out.println("Choose an action for the waiter:");
-        System.out.println("1. Seat a customer");
-        System.out.println("2. Take an order");
-        System.out.println("3. Serve an order");
-        System.out.println("4. Wait");
-        return readIntInRange(1, 4, "Invalid choice. Please try again.");
+        print("waiter.menu.title");
+        print("waiter.menu.seat");
+        print("waiter.menu.takeOrder");
+        print("waiter.menu.serve");
+        print("waiter.menu.wait");
+        return readIntInRange(1, 4, "input.invalidChoice");
     }
 
     public int chooseChefAction() {
-        System.out.println("Choose an action for the chef:");
-        System.out.println("1. Prepare an order");
-        System.out.println("2. Wait");
-        return readIntInRange(1, 2, "Invalid choice. Please try again.");
+        print("chef.menu.title");
+        print("chef.menu.prepare");
+        print("chef.menu.wait");
+        return readIntInRange(1, 2, "input.invalidChoice");
     }
 
     public int chooseTableToOrder(int numberOfTables) {
-        System.out.println("Enter the table number to take order from (1-" + numberOfTables + "):");
-        return readIntInRange(1, numberOfTables, "Invalid table number. Please try again.") - 1;
+        print("waiter.prompt.table", numberOfTables);
+        return readIntInRange(1, numberOfTables, "input.invalidTable") - 1;
     }
 
     public int chooseOrderToServe(int numberOfOrders) {
-        System.out.println("Enter order number to serve:");
-        return readIntInRange(1, numberOfOrders, "Invalid order number. Please try again.") - 1;
+        print("waiter.prompt.serve");
+        return readIntInRange(1, numberOfOrders, "input.invalidOrder") - 1;
     }
 
     public int chooseOrderToPrepare(int numberOfOrders) {
-        System.out.print("Enter the number of the order to prepare: ");
-        return readIntInRange(1, numberOfOrders, "Invalid order number. Please try again.") - 1;
+        print(PROMPT, "chef.prompt.prepare");
+        return readIntInRange(1, numberOfOrders, "input.invalidOrder") - 1;
     }
 
-    public void displayTurnStart(int turn, int maxTurns, float revenue, Float averageSatisfaction,
-                                 List<Customer> queue, Customer[] tables, List<MenuItem> orders,
-                                 List<String> waiterTasks, List<String> chefTasks) {
+    public void displayTurnStart(int turn, int maxTurns,
+                                List<String> waiterTasks, List<String> chefTasks) {
         System.out.println();
-        System.out.println("===== Turn " + turn + " / " + maxTurns + " =====");
-        System.out.printf("Revenue: $%.2f | Average satisfaction of paid customers: %s%n",
-                revenue, formatAverageSatisfaction(averageSatisfaction));
+        print("turn.header", turn, maxTurns);
+        print("turn.summary", this.stats.getRevenue(), formatAverageSatisfaction(this.stats.getAverageSatisfaction()));
 
-        System.out.println("Waiting queue:");
-        if (queue.isEmpty()) {
-            System.out.println("  (empty)");
+        print("turn.queue.title");
+        if (this.queue.isEmpty()) {
+            print(INDENT, "list.empty");
         }
-        for (Customer customer : queue) {
-            System.out.println("  " + customer.getName() + " - satisfaction " + customer.getSatisfaction());
+        for (Customer customer : this.queue) {
+            print(INDENT, "turn.queue.entry", customer.getName(), customer.getSatisfaction());
         }
 
-        System.out.println("Tables:");
-        for (int i = 0; i < tables.length; i++) {
-            if (tables[i] == null) {
-                System.out.println("  Table " + (i + 1) + ": empty");
+        print("turn.tables.title");
+        for (int i = 0; i < this.tables.length; i++) {
+            if (this.tables[i] == null) {
+                print(INDENT, "turn.table.empty", i + 1);
             } else {
-                System.out.println("  Table " + (i + 1) + ": " + tables[i].getName() + " - " + tables[i].getStatus()
-                        + " - satisfaction " + tables[i].getSatisfaction());
+                print(INDENT, "turn.table.occupied", i + 1, this.tables[i].getName(),
+                        this.tables[i].getStatus(), this.tables[i].getSatisfaction());
             }
         }
 
-        System.out.println("Orders:");
-        if (orders.isEmpty()) {
-            System.out.println("  (none)");
+        print("turn.orders.title");
+        if (this.orders.isEmpty()) {
+            print(INDENT, "list.none");
         }
-        for (int i = 0; i < orders.size(); i++) {
-            MenuItem order = orders.get(i);
-            System.out.println("  " + (i + 1) + ". " + order.getName() + " for table " + (order.getTableNo() + 1) + " - "
-                    + order.getStatus() + " (" + order.getPreparationUnits() + " preparation units left)");
+        for (int i = 0; i < this.orders.size(); i++) {
+            MenuItem order = this.orders.get(i);
+            print(INDENT, "turn.orders.entry", i + 1, order.getName(), order.getTableNo() + 1,
+                    order.getStatus(), order.getPreparationUnits());
         }
 
-        System.out.println("Available tasks:");
-        System.out.println("  Waiter: " + String.join(", ", waiterTasks));
-        System.out.println("  Chef: " + String.join(", ", chefTasks));
+        print("turn.tasks.title");
+        print(INDENT, "turn.tasks.waiter", String.join(", ", waiterTasks));
+        print(INDENT, "turn.tasks.chef", String.join(", ", chefTasks));
         System.out.println();
     }
 
     public void displayCustomerArrived(Customer customer) {
-        System.out.println(customer.getName() + " has joined the queue.");
+        print("arrival.joined", customer.getName());
     }
 
     public void displayNoCustomersInQueue() {
-        System.out.println("No customers in the queue to seat.");
+        print("seat.noQueue");
     }
 
     public void displayNoAvailableTables() {
-        System.out.println("No available tables to seat the customer.");
+        print("seat.noTables");
     }
 
     public void displayCustomerSeated(int tableIndex) {
-        System.out.println("Customer seated at table " + (tableIndex + 1) + ".");
+        print("seat.done", tableIndex + 1);
     }
 
     public void displayNoCustomersToOrder() {
-        System.out.println("No seated customers waiting to order.");
+        print("order.noneWaiting");
     }
 
     public void displayNoCustomerAtTableToOrder(int tableIndex) {
-        System.out.println("No customer at table " + (tableIndex + 1) + " waiting to order.");
+        print("order.noCustomerAtTable", tableIndex + 1);
     }
 
     public void displayOrderTaken(int tableIndex, MenuItem order) {
-        System.out.println("Order taken from table " + (tableIndex + 1) + ": " + order.getName());
+        print("order.taken", tableIndex + 1, order.getName());
     }
 
     public void displayNoOrdersReady() {
-        System.out.println("No orders are ready to be served.");
+        print("serve.noneReady");
     }
 
     public void displayReadyOrders(List<Integer> orderIndexes) {
-        System.out.println("Ready to be served orders:");
+        print("serve.readyTitle");
         for (int orderIndex : orderIndexes) {
-            System.out.println("Order " + (orderIndex + 1));
+            print("serve.readyEntry", orderIndex + 1);
         }
     }
 
     public void displayOrderNotReady(int orderIndex) {
-        System.out.println("Order " + (orderIndex + 1) + " is not ready to be served.");
+        print("serve.notReady", orderIndex + 1);
     }
 
     public void displayOrderServed(int orderIndex, int tableIndex) {
-        System.out.println("Order " + (orderIndex + 1) + " served to table " + (tableIndex + 1) + ".");
+        print("serve.done", orderIndex + 1, tableIndex + 1);
     }
 
     public void displayNoOrdersToPrepare() {
-        System.out.println("No orders to prepare.");
+        print("cook.noOrders");
     }
 
-    public void displayOrdersToPrepare(List<MenuItem> orders) {
-        System.out.println("Orders to prepare:");
-        for (int i = 0; i < orders.size(); i++) {
-            MenuItem order = orders.get(i);
-            System.out.println((i + 1) + ". " + order.getName() + " - Status: " + order.getStatus());
+    public void displayOrdersToPrepare() {
+        print("cook.listTitle");
+        for (int i = 0; i < this.orders.size(); i++) {
+            MenuItem order = this.orders.get(i);
+            print("cook.listEntry", i + 1, order.getName(), order.getStatus());
         }
     }
 
     public void displayOrderPrepared(MenuItem order) {
-        System.out.println("Order " + order.getName() + " is being prepared. Remaining preparation units: " + order.getPreparationUnits());
+        print("cook.done", order.getName(), order.getPreparationUnits());
     }
 
     public void displayPayment(int tableIndex, MenuItem order) {
-        System.out.printf("Customer at table %d has paid for their order: %s - $%.2f%n", tableIndex + 1, order.getName(), order.getPrice());
+        print("pay.done", tableIndex + 1, order.getName(), order.getPrice());
     }
 
-    public void displayGameOver(int turnsUsed, int maxTurns, int servedCustomers, int paidCustomers,
-                                int unhappyDepartures, float revenue, Float averageSatisfaction, boolean victory) {
+    public void displayGameOver(int turnsUsed, int maxTurns, boolean victory) {
         System.out.println();
-        System.out.println("===== Game Over =====");
-        System.out.println("Turns used: " + turnsUsed + " / " + maxTurns);
-        System.out.println("Customers served: " + servedCustomers);
-        System.out.println("Paid customers: " + paidCustomers);
-        System.out.println("Unhappy departures: " + unhappyDepartures);
-        System.out.printf("Revenue: $%.2f%n", revenue);
-        System.out.println("Average satisfaction of paid customers: " + formatAverageSatisfaction(averageSatisfaction));
-        System.out.println(victory ? "Victory!" : "Defeat!");
+        print("gameover.title");
+        print("gameover.turns", turnsUsed, maxTurns);
+        print("gameover.served", this.stats.getServedCustomers());
+        print("gameover.paid", this.stats.getPaidCustomers());
+        print("gameover.unhappy", this.stats.getUnhappyDepartures());
+        print("gameover.revenue", this.stats.getRevenue());
+        print("gameover.average", formatAverageSatisfaction(this.stats.getAverageSatisfaction()));
+        print(victory ? "gameover.victory" : "gameover.defeat");
+    }
+
+    private void print(int flags, String key, Object... args) {
+        String text = Messages.get(key, args);
+        if ((flags & INDENT) != 0) {
+            text = "  " + text;
+        }
+        if ((flags & PROMPT) != 0) {
+            System.out.print(text + " ");
+        } else {
+            System.out.println(text);
+        }
+    }
+
+    private void print(String key, Object... args) {
+        print(0, key, args);
     }
 
     private String formatAverageSatisfaction(Float averageSatisfaction) {
         if (averageSatisfaction == null) {
-            return "N/A";
+            return Messages.get("gameover.notAvailable");
         }
         return String.format("%.2f", averageSatisfaction);
     }

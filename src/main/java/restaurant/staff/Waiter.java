@@ -2,10 +2,10 @@ package restaurant.staff;
 
 import java.util.ArrayList;
 
-import restaurant.MenuItem;
-import restaurant.MenuItemStatus;
 import restaurant.customers.Customer;
 import restaurant.customers.CustomerStatus;
+import restaurant.menu.MenuItem;
+import restaurant.menu.MenuItemStatus;
 import restaurant.ui.GameUI;
 
 public class Waiter {

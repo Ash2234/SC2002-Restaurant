@@ -1,4 +1,4 @@
-package restaurant;
+package restaurant.menu;
 public enum MenuItemStatus {
     MENU,
     ORDERED,        // order taken, food not yet served
