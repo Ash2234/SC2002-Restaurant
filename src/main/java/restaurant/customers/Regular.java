@@ -7,14 +7,14 @@ import restaurant.MenuItem;
 public class Regular extends Customer {
     static Random random = new Random(67L);
 
-    public Regular() {
-        super();
+    public Regular(MenuItem[] menu) {
+        super(menu);
         this.satisfactionLoss = 8;
     }
 
     @Override
     public MenuItem order() {
-        int choice = this.random.nextInt(menuItems.length);
-        return new MenuItem(menuItems[choice]);
+        int choice = random.nextInt(this.menu.length);
+        return new MenuItem(this.menu[choice]);
     }
 }

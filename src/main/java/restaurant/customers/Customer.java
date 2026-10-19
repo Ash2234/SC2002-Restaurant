@@ -3,17 +3,28 @@ package restaurant.customers;
 import restaurant.MenuItem;
 
 public abstract class Customer {
+    private static int nextId = 1;
+
+    private final int id;
     private int satisfaction = 100;
-    private int satisfactionLoss;
-    private float bill;
+    protected int satisfactionLoss;
     private CustomerStatus status;
-    private MenuItem[] menu;
+    protected MenuItem[] menu;
 
     public Customer(MenuItem[] menu) {
         this.menu = menu;
+        this.id = nextId++;
+    }
+
+    public String getName() {
+        return "Customer " + this.id;
     }
 
     public abstract MenuItem order();
+
+    public int getSatisfaction() {
+        return this.satisfaction;
+    }
 
     public CustomerStatus getStatus() {
         return this.status;
@@ -23,15 +34,14 @@ public abstract class Customer {
         this.status = status;
     }
 
-    public boolean satisfactionDecay() {
+    public void satisfactionDecay() {
         if (this.status == CustomerStatus.WAITING || this.status == CustomerStatus.SEATED) {
             this.satisfaction -= this.satisfactionLoss;
         }
 
         if (this.satisfaction <= 0) {
             this.satisfaction = 0;
-            return true;
+            this.status = CustomerStatus.LEAVING;
         }
-        return false;
     }
 }

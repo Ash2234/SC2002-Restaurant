@@ -1,60 +1,51 @@
 package restaurant.staff;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
 
 import restaurant.MenuItem;
 import restaurant.MenuItemStatus;
 import restaurant.customers.Customer;
 import restaurant.customers.CustomerStatus;
+import restaurant.ui.GameUI;
 
 public class Waiter {
-    private Scanner scanner;
+    private GameUI ui;
     private ArrayList<Customer> queue;
     private Customer[] tables;
     private ArrayList<MenuItem> orders;
 
-    public Waiter(ArrayList<Customer> queue, Customer[] tables, ArrayList<MenuItem> orders, Scanner scanner) {
+    public Waiter(ArrayList<Customer> queue, Customer[] tables, ArrayList<MenuItem> orders, GameUI ui) {
         this.queue = queue;
         this.tables = tables;
         this.orders = orders;
-        this.scanner = scanner;
+        this.ui = ui;
     }
 
     public void takeAction() {
-        // Might move to main app instead for OOP rules but tbd
-
         while (true) {
-            System.out.println("Choose an action for the waiter:");
-            System.out.println("1. Seat a customer");
-            System.out.println("2. Take an order");
-            System.out.println("3. Serve an order");
-            System.out.println("4. Exit");
-
-            int choice = this.scanner.nextInt();
+            int choice = this.ui.chooseWaiterAction();
 
             switch (choice) {
                 case 1:
-                    if (!seatCustomer()) {
-                        continue;
+                    if (seatCustomer()) {
+                        return;
                     }
                     break;
+
                 case 2:
-                    if (!takeOrder()) {
-                        continue;
+                    if (takeOrder()) {
+                        return;
                     }
                     break;
+
                 case 3:
-                    if (!serveOrder()) {
-                        continue;
+                    if (serveOrder()) {
+                        return;
                     }
                     break;
+
                 case 4:
-                    return; // Exit the method
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+                    return;
             }
         }
     }
@@ -63,81 +54,134 @@ public class Waiter {
         // Should be seating the first customer in the queue to the first available table
         // Could let player choose which table or which customer to seat next time
         if (this.queue.isEmpty()) {
-            System.out.println("No customers in the queue to seat.");
+            this.ui.displayNoCustomersInQueue();
             return false;
         }
 
         for (int i = 0; i < this.tables.length; i++) {
             if (this.tables[i] == null) {
                 this.tables[i] = this.queue.get(0);
+                this.tables[i].setStatus(CustomerStatus.SEATED);
 
                 this.queue.remove(0);
-                System.out.println("Customer seated at table " + (i + 1) + ".");
+                this.ui.displayCustomerSeated(i);
                 return true;
             }
         }
 
-        System.out.println("No available tables to seat the customer.");
+        this.ui.displayNoAvailableTables();
         return false;
     }
 
     public boolean takeOrder() {
         // Could shift tablenumber logic to turn()
 
-        if (Arrays.stream(tables).allMatch(Objects::isNull)) {
-            System.out.println("No customers at the tables to take orders from.");
+        boolean hasCustomerToOrder = false;
+        for (int i = 0; i < tables.length; i++) {
+            if (canTakeOrder(i)) {
+                hasCustomerToOrder = true;
+            }
+        }
+
+        if (!hasCustomerToOrder) {
+            this.ui.displayNoCustomersToOrder();
             return false;
         }
 
+        int tableIndex;
         while (true){
-            System.out.println("Enter the table number to take order from (1-" + tables.length + "):");
-            int choice = this.scanner.nextInt();
+            tableIndex = this.ui.chooseTableToOrder(tables.length);
 
-            if (choice < 1 || choice > tables.length) {
-                System.out.println("Invalid table number. Please try again.");
+            if (!canTakeOrder(tableIndex)) {
+                this.ui.displayNoCustomerAtTableToOrder(tableIndex);
                 continue;
             }
 
-            if (tables[choice - 1] == null || !tables[choice - 1].getStatus().equals(CustomerStatus.SEATED)) {
-                System.out.println("No customer at table " + choice + " to take order from.");
-                continue;
-            }
-
-            Customer customer = tables[choice - 1];
+            Customer customer = tables[tableIndex];
             MenuItem order = customer.order();
-            order.setTableNo(choice);
+            order.setTableNo(tableIndex);
             order.setStatus(MenuItemStatus.ORDERED);
             orders.add(order);
-            System.out.println("Order taken from table " + choice + ": " + order.getName());
+            this.ui.displayOrderTaken(tableIndex, order);
             return true;
         }
     }
 
     public boolean serveOrder() {
-        if (orders.isEmpty()) {
-            System.out.println("No orders to serve.");
+        ArrayList<Integer> readyOrderIndexes = new ArrayList<>();
+        for (int i = 0; i < this.orders.size(); i++) {
+            if (this.orders.get(i).getStatus() == MenuItemStatus.READY) {
+                readyOrderIndexes.add(i);
+            }
+        }
+
+        if (readyOrderIndexes.isEmpty()) {
+            this.ui.displayNoOrdersReady();
             return false;
         }
 
+        this.ui.displayReadyOrders(readyOrderIndexes);
+
         while (true) {
-            System.out.println("Enter order number to serve (1-" + orders.size() + "):");
-            int choice = this.scanner.nextInt();
-            if (choice < 1 || choice > orders.size()) {
-                System.out.println("Invalid order number. Please try again.");
+            int orderIndex = this.ui.chooseOrderToServe(orders.size());
+
+            if (orders.get(orderIndex).getStatus() != MenuItemStatus.READY) {
+                this.ui.displayOrderNotReady(orderIndex);
                 continue;
             }
 
-            if (orders.get(choice - 1).getStatus() != MenuItemStatus.READY) {
-                System.out.println("Order " + choice + " is not ready to be served.");
-                continue;
-            }
-
-            MenuItem orderToServe = orders.get(choice - 1);
+            MenuItem orderToServe = orders.get(orderIndex);
             int tableNo = orderToServe.getTableNo();
-            this.tables[tableNo - 1].setStatus(CustomerStatus.EATING);
+            this.tables[tableNo].setStatus(CustomerStatus.SERVED);
             orderToServe.setStatus(MenuItemStatus.SERVED);
-            System.out.println("Order " + choice + " served to table " + tableNo + ".");
+            this.ui.displayOrderServed(orderIndex, tableNo);
             return true;
         }
+    }
+
+    // A seated customer can only order once, so skip tables that already have an order
+    public boolean canTakeOrder(int tableIndex) {
+        if (this.tables[tableIndex] == null || this.tables[tableIndex].getStatus() != CustomerStatus.SEATED) {
+            return false;
+        }
+
+        for (MenuItem order : this.orders) {
+            if (order.getTableNo() == tableIndex) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ArrayList<String> getAvailableTasks() {
+        boolean hasFreeTable = false;
+        boolean hasSeatedCustomer = false;
+        for (int i = 0; i < this.tables.length; i++) {
+            if (this.tables[i] == null) {
+                hasFreeTable = true;
+            } else if (canTakeOrder(i)) {
+                hasSeatedCustomer = true;
+            }
+        }
+
+        boolean hasReadyOrder = false;
+        for (MenuItem order : this.orders) {
+            if (order.getStatus() == MenuItemStatus.READY) {
+                hasReadyOrder = true;
+            }
+        }
+
+        ArrayList<String> waiterTasks = new ArrayList<>();
+        if (!this.queue.isEmpty() && hasFreeTable) {
+            waiterTasks.add("Seat a customer");
+        }
+        if (hasSeatedCustomer) {
+            waiterTasks.add("Take an order");
+        }
+        if (hasReadyOrder) {
+            waiterTasks.add("Serve an order");
+        }
+        waiterTasks.add("Wait");
+        return waiterTasks;
     }
 }

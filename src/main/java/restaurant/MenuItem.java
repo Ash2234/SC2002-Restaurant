@@ -6,7 +6,7 @@ public class MenuItem {
     private int preparationUnits;
     
     private MenuItemStatus status = MenuItemStatus.MENU;
-    private int tableNo;
+    private Integer tableNo;
 
     public MenuItem(String name, float price, int preparationUnits) {
         this.name = name;
@@ -40,11 +40,11 @@ public class MenuItem {
         this.status = status;
     }
 
-    public int getTableNo() {
+    public Integer getTableNo() {
         return tableNo;
     }
 
-    public void setTableNo(int tableNo) {
+    public void setTableNo(Integer tableNo) {
         this.tableNo = tableNo;
     }
 
