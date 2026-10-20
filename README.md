@@ -6,6 +6,7 @@ javac -d out -sourcepath src/main/java src/main/java/restaurant/RestaurantRushAp
 To run:
 ```cmd
 java -cp out restaurant.RestaurantRushApp
+copy messages.properties out\
 ```
 
 To build docs:
