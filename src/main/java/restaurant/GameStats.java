@@ -1,5 +1,12 @@
 package restaurant;
 
+/**
+ * Maintains the values of:
+ * revenue, customers served, customers who paid, unhappy departures, and the total satisfaction of paid customers
+ *
+ * A single instance is shared by the Cashier, the game loop and the UI, so they all read and write from the same object
+ * The average satisfaction is calculated from paid customers only, and is null until the first customer pays.
+ */
 public class GameStats {
     private float revenue;
     private int servedCustomers;
@@ -28,8 +35,19 @@ public class GameStats {
         return (float) totalSatisfaction / paidCustomers;
     }
 
-    public float getRevenue() { return revenue; }
-    public int getServedCustomers() { return servedCustomers; }
-    public int getPaidCustomers() { return paidCustomers; }
-    public int getUnhappyDepartures() { return unhappyDepartures; }
+    public float getRevenue() {
+        return revenue;
+    }
+
+    public int getServedCustomers() {
+        return servedCustomers;
+    }
+
+    public int getPaidCustomers() {
+        return paidCustomers;
+    }
+
+    public int getUnhappyDepartures() {
+        return unhappyDepartures;
+    }
 }

@@ -1,5 +1,17 @@
 package restaurant.menu;
 
+/**
+ * The MenuItem serves as both an order and a menu item
+ * The lifecycle of a MenuItem:
+ * 1. Is initialized in the main game loop and stored in the menu array
+ * 2. Customer orders it off the menu by copying it and giving it to the Waiter
+ * 3. The Waiter then stores it in the orders array
+ * 4. The Chefs cooks it and the Waiter serves it
+ * 5. The Customer finishes eating and pays, the Cashier then sets it status to PAID
+ * 
+ * It holds the table number that ordered it, status, name, price and preparation units.
+ * To be initialized with preparationUnits, name and price
+ */
 public class MenuItem {
     private String name;
     private float price;
@@ -14,6 +26,9 @@ public class MenuItem {
         this.preparationUnits = preparationUnits;
     }
 
+    /**
+     * Clone method
+     */
     public MenuItem(MenuItem menuItem) {
         this.name = menuItem.getName();
         this.price = menuItem.getPrice();
@@ -38,6 +53,10 @@ public class MenuItem {
         this.tableNo = tableNo;
     }
 
+    /**
+     * Manages its own preparationUnit through the public cook() method
+     * Automatically swtiches its own status from ORDERED to READY
+     */
     public void cook() {
         if (this.preparationUnits > 0) {
             this.preparationUnits--;

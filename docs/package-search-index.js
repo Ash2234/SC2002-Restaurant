@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"restaurant"},{"l":"restaurant.customers"},{"l":"restaurant.menu"},{"l":"restaurant.staff"},{"l":"restaurant.ui"}];updateSearchResults();

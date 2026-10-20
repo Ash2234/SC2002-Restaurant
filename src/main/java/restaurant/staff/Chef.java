@@ -6,6 +6,16 @@ import restaurant.menu.MenuItem;
 import restaurant.menu.MenuItemStatus;
 import restaurant.ui.GameUI;
 
+/**
+ * The Chef can only do one task per turn:
+ * Prepare an order (advances one order by one preparation unit)
+ * Wait
+ *
+ * The main method is takeAction(), which prompts the user to choose the task for the Chef to do
+ *
+ * This class applies the rules for preparing orders and updates the shared order list
+ * Order indexes used here are 0-based.
+ */
 public class Chef {
     private GameUI ui;
     private ArrayList<MenuItem> orders;
@@ -33,6 +43,14 @@ public class Chef {
         }
     }
 
+    /**
+     * Displays the orders and asks the user which one to prepare
+     * Advances the chosen order by one preparation unit
+     *
+     * Displays success or failure message
+     *
+     * Returns boolean of whether or not an order was prepared
+     */
     public boolean prepareOrder() {
         if (orders.isEmpty()) {
             this.ui.displayNoOrdersToPrepare();

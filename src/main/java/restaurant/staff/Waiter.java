@@ -8,6 +8,17 @@ import restaurant.menu.MenuItem;
 import restaurant.menu.MenuItemStatus;
 import restaurant.ui.GameUI;
 
+/**
+ * The Waiter can only do one task per turn: 
+ * Seat a customer from the queue
+ * Take a seated customer's order
+ * Serve a ready order
+ * 
+ * The main method is takeAction(), which prompts the user to choose the task for the Waiter to do
+ *
+ * This class applies the rules for each task and updates the shared queue, tables and order list
+ * Table and order indexes used here are 0-based.
+ */
 public class Waiter {
     private GameUI ui;
     private ArrayList<Customer> queue;
@@ -50,6 +61,13 @@ public class Waiter {
         }
     }
 
+    /**
+     * Seats the first customer in the queue into the first available table
+     * 
+     * It displays the success or failure messages to user
+     * 
+     * Returns boolean of whether or not the customer was successfully seated
+     */
     public boolean seatCustomer() {
         // Should be seating the first customer in the queue to the first available table
         // Could let player choose which table or which customer to seat next time
@@ -73,6 +91,14 @@ public class Waiter {
         return false;
     }
 
+    /**
+     * Asks the user for the table to take the order from
+     * Takes the order and places it into the shared instance of orders
+     * 
+     * Displays success or failure message
+     * 
+     * Returns boolean of whether or not the order was able to be taken
+     */
     public boolean takeOrder() {
         // Could shift tablenumber logic to turn()
 
@@ -107,6 +133,13 @@ public class Waiter {
         }
     }
 
+    /**
+     * Gathers the list of orders that are ready to be served then displays them
+     * 
+     * After serving the order, it changes the order and Customer status to served
+     * 
+     * Returns boolean on whether the order was successfully served
+     */
     public boolean serveOrder() {
         ArrayList<Integer> readyOrderIndexes = new ArrayList<>();
         for (int i = 0; i < this.orders.size(); i++) {

@@ -10,6 +10,16 @@ import restaurant.menu.MenuItem;
 import restaurant.menu.MenuItemStatus;
 import restaurant.ui.GameUI;
 
+/**
+ * The Cashier collects payment automatically, with no choice from the user:
+ * at most one customer per turn, the one who has been ready to pay the longest
+ *
+ * The main method is takeAction(), which takes the next table from the cashier queue and charges that table's order
+ * The cashier queue stores the table numbers of Customers that are ready to pay
+ *
+ * This class applies the rules for payment and updates the shared tables, order list and game statistics
+ * Table indexes used here are 0-based.
+ */
 public class Cashier {
     private Queue<Integer> cashierQueue;
     private Customer[] tables = new Customer[2];
@@ -30,6 +40,12 @@ public class Cashier {
         return this.stats.getRevenue();
     }
 
+    /**
+     * The 'oldest' customer with READY_TO_PAY is determined by the cashier queue
+     * The cashier queue uses the builtin Java queue to ensure that its enqueued and dequeued properly
+     * 
+     * It then updates the average satisfaction and total revenue accordingly in GameStats
+     */
     public void takeAction() {
         Integer tableNo = this.cashierQueue.poll();
         if (tableNo == null) {

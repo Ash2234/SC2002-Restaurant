@@ -8,6 +8,18 @@ import restaurant.GameStats;
 import restaurant.customers.Customer;
 import restaurant.menu.MenuItem;
 
+/**
+ * Console user interface for the game
+ * It purely functions as an I/O interface for other objects in the game
+ * It also serves as a filter to clean up inputs
+ *
+ * It contains no game rules
+ * The staff classes and the game loop decide what is allowed and calls the display methods
+ *  All dialogue is looked up by key from messages.properties through the Messages class.
+ *
+ * The queue, tables, orders and statistics are update automatically
+ * Logic holding classes share the same instances of these objects so the methods don't get overloaded with arguments
+ */
 public class GameUI {
     // Print flags, combine with | (e.g. INDENT | PROMPT)
     private static final int INDENT = 1;  // two-space indent
@@ -195,6 +207,9 @@ public class GameUI {
         print(victory ? "gameover.victory" : "gameover.defeat");
     }
 
+    /**
+     * Serves as an intermediate function to call the Messages object and has flags for indetation and no newline
+     */
     private void print(int flags, String key, Object... args) {
         String text = Messages.get(key, args);
         if ((flags & INDENT) != 0) {
@@ -211,6 +226,9 @@ public class GameUI {
         print(0, key, args);
     }
 
+    /**
+     * Just a formatter for the satisfaction and returns a string
+     */
     private String formatAverageSatisfaction(Float averageSatisfaction) {
         if (averageSatisfaction == null) {
             return Messages.get("gameover.notAvailable");

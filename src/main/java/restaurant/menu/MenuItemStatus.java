@@ -1,4 +1,7 @@
 package restaurant.menu;
+/**
+ * Different states of a MenuItem throughout its lifecycle
+ */
 public enum MenuItemStatus {
     MENU,
     ORDERED,        // order taken, food not yet served
