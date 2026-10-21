@@ -1,12 +1,12 @@
 To compile:
 ```cmd
 javac -d out -sourcepath src/main/java src/main/java/restaurant/RestaurantRushApp.java
+copy messages.properties out\
 ```
 
 To run:
 ```cmd
 java -cp out restaurant.RestaurantRushApp
-copy messages.properties out\
 ```
 
 To build docs:
